@@ -9,7 +9,7 @@ public class PlaceDAO {
 
     private static final String jdbcUrl = "jdbc:mysql://localhost:3306/ipp_pickgo?useSSL=false&serverTimezone=UTC";
     private static final String dbUser = "root";
-    private static final String dbPass = "jang1107";
+    private static final String dbPass = "1234";
 
     static {
         try {
