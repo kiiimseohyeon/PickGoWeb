@@ -1,0 +1,98 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="pick_go.dto.PlaceDTO" %>
+
+<%@ page import="pick_go.dao.PlaceDAO" %>
+
+<%@ page import="java.util.*" %>
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>태그 기반 장소 검색</title>
+
+</head>
+
+<body>
+
+
+
+<h2>태그 기반 장소 검색</h2>
+
+<form method="post" action="tag_research.jsp">
+
+    <label>검색할 태그들을 입력하세요 (예: 맛집 대전):</label><br>
+
+    <input type="text" name="tags" size="50" required>
+
+    <input type="submit" value="검색">
+
+</form>
+
+
+
+<hr>
+
+
+
+<%
+
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+
+        String input = request.getParameter("tags");
+
+        if (input != null && !input.trim().isEmpty()) {
+
+            List<String> keywords = Arrays.asList(input.trim().toLowerCase().split("\\s+"));
+
+            try {
+
+                PlaceDAO dao = new PlaceDAO();
+
+                List<PlaceDTO> places = dao.findPlacesByTags(keywords);
+
+
+
+                if (places.isEmpty()) {
+
+                    out.println("<p style='color:red;'>❌ 입력한 모든 태그를 포함한 장소가 없습니다.</p>");
+
+                } else {
+
+                    out.println("<h3>✅ 모든 태그를 포함한 장소:</h3><ul>");
+
+                    for (PlaceDTO place : places) {
+
+                        out.println("<li><p><strong>" + place.getName() + "</strong></p>");
+
+                        out.println("<img src='" + place.getImageUrl() + "' width='200' height='150' alt='이미지 없음'></li>");
+
+                    }
+
+                    out.println("</ul>");
+
+                }
+
+
+
+            } catch (Exception e) {
+
+                out.println("<p style='color:red;'>오류: " + e.getMessage() + "</p>");
+
+            }
+
+        }
+
+    }
+
+%>
+
+
+
+</body>
+
+</html>
