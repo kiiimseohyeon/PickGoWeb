@@ -18,16 +18,39 @@ public class PlaceDAO {
             throw new RuntimeException("JDBC 드라이버 로딩 실패", e);
         }
     }
+    public List<PlaceDTO> findAllPlaces() throws Exception {
+        List<PlaceDTO> list = new ArrayList<>();
 
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, dbUser, dbPass)) {
+            String sql = "SELECT name, image_url FROM place";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String imageUrl = rs.getString("image_url");
+
+                    // 로그 출력
+                    System.out.println("[DEBUG] name: " + name + ", imageUrl: " + imageUrl);
+
+                    list.add(new PlaceDTO(name, imageUrl));
+                }
+            }
+        }
+
+        return list;
+    }
+
+
+    
     public List<PlaceDTO> findPlacesByTags(List<String> keywords) throws Exception {
         List<PlaceDTO> results = new ArrayList<>();
 
         try (Connection conn = DriverManager.getConnection(jdbcUrl, dbUser, dbPass)) {
 
-            // 1. 태그 이름으로 태그 ID 조회
-            String tagSql = "SELECT id FROM tag WHERE LOWER(name) IN (" +
+            String tagIdSql = "SELECT id FROM tag WHERE LOWER(name) IN (" +
                     String.join(",", Collections.nCopies(keywords.size(), "?")) + ")";
-            PreparedStatement tagStmt = conn.prepareStatement(tagSql);
+            PreparedStatement tagStmt = conn.prepareStatement(tagIdSql);
             for (int i = 0; i < keywords.size(); i++) {
                 tagStmt.setString(i + 1, keywords.get(i));
             }
@@ -39,34 +62,37 @@ public class PlaceDAO {
             }
 
             if (tagIds.size() != keywords.size()) {
-                // 일부 태그가 DB에 존재하지 않음
-                return results;
+                throw new Exception("❌ 입력한 태그 중 일부가 존재하지 않습니다.");
             }
 
-            // 2. 해당 태그들을 모두 포함하는 장소 조회 (JOIN + GROUP BY + HAVING)
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT p.name, p.image_url ")
-               .append("FROM place p ")
-               .append("JOIN place_tag pt ON p.id = pt.place_id ")
-               .append("WHERE pt.tag_id IN (")
-               .append(String.join(",", Collections.nCopies(tagIds.size(), "?")))
-               .append(") ")
-               .append("GROUP BY p.id ")
-               .append("HAVING COUNT(DISTINCT pt.tag_id) = ?");
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT p.name, p.image_url ")
+                 .append("FROM place p ")
+                 .append("JOIN place_tag pt ON p.id = pt.place_id ")
+                 .append("WHERE pt.tag_id IN (")
+                 .append(String.join(",", Collections.nCopies(tagIds.size(), "?")))
+                 .append(") ")
+                 .append("GROUP BY p.id ")
+                 .append("HAVING COUNT(DISTINCT pt.tag_id) = ?");
 
-            PreparedStatement stmt = conn.prepareStatement(sql.toString());
+            PreparedStatement placeStmt = conn.prepareStatement(query.toString());
             int idx = 1;
             for (Integer tagId : tagIds) {
-                stmt.setInt(idx++, tagId);
+                placeStmt.setInt(idx++, tagId);
             }
-            stmt.setInt(idx, tagIds.size());
+            placeStmt.setInt(idx, tagIds.size());
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String imageUrl = rs.getString("image_url");
+            ResultSet placeRs = placeStmt.executeQuery();
+            while (placeRs.next()) {
+                String name = placeRs.getString("name");
+                String imageUrl = placeRs.getString("image_url");
                 results.add(new PlaceDTO(name, imageUrl));
             }
+
+            placeRs.close();
+            placeStmt.close();
+            tagRs.close();
+            tagStmt.close();
         }
 
         return results;
