@@ -59,7 +59,7 @@ body {
 .carousel-item {
     width: 80px;
     height: 80px;
-    background-color: #444;
+    background-color: #111;
     border-radius: 50%;
     text-align: center;
     display: flex;
@@ -70,34 +70,87 @@ body {
     font-size: 0.8rem;
 }
 
-/*  카테고리(맛집, 놀거리, 카페) 박스 설정 가능 */
-.category {
-    background-color: #333;
-    margin: 10px;
-    padding: 15px;
-    border-radius: 10px;
+/* 카테고리 카드 스타일 */
+.category-card {
+    width: 300px;  /* 카테고리 카드 너비 */
+    height: 220px; /* 카테고리 카드 높이 */
+    background-color: #444;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
 }
 
-/* 카테고리 글자 크기 설정 px로도 가능 */
+.category-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지 비율 유지하면서 꽉 채우기 */
+}
+
+/* 배너 텍스트 및 오버레이 스타일 */
+.banner-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+/* 카테고리 텍스트 스타일 */
+.category-name {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.95rem;
+}
+/* 카테고리 전체 영역 여백 확보 */
+.category-area {
+    margin-bottom: 40px;
+    padding: 0 40px;
+}
+
+/* 카테고리 제목 간 여백 */
 .category-title {
     font-size: 1.2rem;
-    margin-bottom: 10px;
+    margin: 20px 0 10px 10px; /* 위쪽과 왼쪽 여백 */
 }
 
-/* 카드 목록 스타일 (슬라이드) */
+/* 카드들을 감싸는 영역 간격 및 정렬 개선 */
 .category-content {
     display: flex;
-    gap: 15px;
-    overflow-x: auto;
+    flex-wrap: nowrap; /* ✅ 한 줄로! 줄바꿈 X */
+    overflow-x: auto;   /* ✅ 가로 스크롤 허용 */
+    gap: 20px;
+    padding: 10px 20px;
     scroll-behavior: smooth;
-    margin: 0 40px; /* 좌우 버튼 공간 확보 */
-    
-    scrollbar-width: none;      
-    -ms-overflow-style: none;   
+
+    /* 스크롤바 숨기기 */
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE 10+ */
+}
+.category-content::-webkit-scrollbar {
+    display: none;                /* Chrome, Safari */
 }
 
-.category-content::-webkit-scrollbar {
-    display: none;            
+/* 카드 스타일 개선 */
+.category-card {
+    width: 300px;
+    height: 220px;
+    background-color: #444;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    margin-bottom: 20px; /* 추가: 세로 간격 확보 */
 }
 
 /* 카드 하나의 크기 및 스타일 설정  */
@@ -156,7 +209,25 @@ body {
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
     transition: background-color 0.2s;
 }
-/* 버튼에 마우스 올리면 색깔 변경 */
+.scroll-btn {
+    background-color: white; 
+    color: black; 
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1;
+    padding: 5px 10px;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%; /* 완전 둥글게 만들기 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    transition: background-color 0.2s;
+}
+
+/* 버튼에 마우스를 올리면 색깔 변경 */
 .scroll-btn:hover {
     background-color: #eee;
 }
@@ -164,14 +235,15 @@ body {
 /* 왼쪽 버튼 위치 */
 .scroll-btn.left {
     position: absolute;
-    left: -20px;
+    left: 10px; /* 적당히 위치 조정 */
 }
 
 /* 오른쪽 버튼 위치 */
 .scroll-btn.right {
     position: absolute;
-    right: -20px;
+    right: 10px; /* 적당히 위치 조정 */
 }
+
 
 /* 하단부 스타일 설정 */
 .footer {
@@ -195,7 +267,7 @@ body {
     text-decoration: underline;
 }
 
-/*상단 배너 영역 설정
+/*상단 배너 영역 설정 */
 .banner-card {
     width: 350px;
     height: 220px;
@@ -253,3 +325,34 @@ body {
     text-align: center;
     font-weight: bold;
 }
+
+/* 검색창 조절 */
+.search-form {
+  margin: 30px auto 20px;
+  max-width: 480px;
+  display: flex; /* Flexbox로 배치 */
+  align-items: center;
+  justify-content: center;
+}
+
+.search-form input {
+  width: 70%; /* 70% 너비로 설정 */
+  padding: 10px;
+  font-size: 16px;
+}
+
+.search-form button {
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px; /* 버튼과 input 사이 여백 */
+}
+
+.search-form button:hover {
+  background-color: #0056b3;
+}
+
+
