@@ -33,7 +33,7 @@ public class PlaceDAO {
 
    
 
-    //  메인 배너 조회 (id 포함)
+    // 메인 배너 조회 (id 포함)
     public List<PlaceDTO> getMainBannerPlaces() {
         List<PlaceDTO> list = new ArrayList<>();
         String sql = "SELECT id, name, image_url FROM place WHERE id <= 15 ORDER BY id";
@@ -75,7 +75,50 @@ public class PlaceDAO {
                 place.setDescription(rs.getString("description"));
             }
 
-        } catch (Excepti회
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return place;
+    }
+    public List<PlaceDTO> findPlacesByExactTags(List<String> inputTags) {
+        List<PlaceDTO> list = new ArrayList<>();
+        if (inputTags == null || inputTags.isEmpty()) return list;
+
+        String placeholders = String.join(",", Collections.nCopies(inputTags.size(), "?"));
+
+        String sql = "SELECT p.id, p.name, p.image_url " +
+                     "FROM place p " +
+                     "JOIN place_tag pt ON p.id = pt.place_id " +
+                     "JOIN tag t ON pt.tag_id = t.id " +
+                     "WHERE LOWER(t.name) IN (" + placeholders + ") " +
+                     "GROUP BY p.id " +
+                     "HAVING COUNT(DISTINCT t.name) = ?";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < inputTags.size(); i++) {
+                pstmt.setString(i + 1, inputTags.get(i).toLowerCase());
+            }
+            pstmt.setInt(inputTags.size() + 1, inputTags.size());
+
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                PlaceDTO dto = new PlaceDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setName(rs.getString("name"));
+                dto.setImage(rs.getString("image_url"));
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+ // 새로운 메서드: 태그 이름 리스트 → 태그 ID 리스트
     public List<Integer> getTagIdsByNames(List<String> names) {
         List<Integer> ids = new ArrayList<>();
         if (names == null || names.isEmpty()) return ids;
@@ -163,3 +206,4 @@ public class PlaceDAO {
 
 
 }
+
